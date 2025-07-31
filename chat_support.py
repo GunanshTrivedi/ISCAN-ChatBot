@@ -1,12 +1,11 @@
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter, CharacterTextSplitter
-from langchain_community.vectorstores import FAISS
+from langchain_community.vectorstores import Chroma
 from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables import RunnableParallel, RunnableLambda, RunnablePassthrough
 import re
 from langchain_core.documents import Document
-from langchain_experimental.text_splitter import SemanticChunker
 from langchain_core.output_parsers import StrOutputParser
 from dotenv import load_dotenv
 
@@ -15,11 +14,11 @@ load_dotenv()
 
 
 model = ChatGoogleGenerativeAI(
-    model= "gemini-2.0-flash",
+    model= "gemini-1.5-flash",
     temperature=0.2,
 )
 
-loader = PyPDFLoader("/home/ashu/langchain/final_chat.pdf")
+loader = PyPDFLoader("F:\PYTHON\iscan-Chat-Bot\chat.pdf")
 docs = loader.load()
 
 full_text = "\n".join([doc.page_content for doc in docs])
@@ -64,7 +63,7 @@ result = splitter.split_documents(qa_docs)
 #     print("------------")
 
 embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-vector_store = FAISS.from_documents(result, embeddings)
+vector_store = Chroma.from_documents(result, embeddings)
 
 retriever = vector_store.as_retriever(search_kwargs={"k": 1})
 
@@ -95,7 +94,7 @@ parser = StrOutputParser()
 
 main_chain = parallel_chain | prompt | model | parser
 
-result1 = main_chain.invoke('my data is disapperared after update the new version of the app')
+result1 = main_chain.invoke('app won’t update. How do I resolve this')
 print(result1)
 
 
